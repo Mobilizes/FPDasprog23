@@ -204,13 +204,51 @@ void modifyData(){
             printf("3. Delete a data.\n");
             printf("0. Change data group.\n");
             char query2[100]; scanf("%s", query2);
-            if(strcmp(query2, "1")==0);
-            else if(strcmp(query2, "2")==0);
-            else if(strcmp(query2, "3")==0);
+            if(strcmp(query2, "1")==0){
+                printf("Prompt data ID.\n");
+                int idx = 0; scanf("%d", &idx);
+                if(Gudang[query].itm[idx].nama!='\0'){
+                    printf("That ID already exists!\n");
+                    continue;
+                }
+                printf("Prompt data name.\n");
+                scanf("%s", Gudang[query].itm[idx].nama);
+                printf("Prompt data stock.\n");
+                scanf("%d", &Gudang[query].itm[idx].stok);
+                nextver++;
+                printf("Data has been successfully added.\n");
+            }
+            else if(strcmp(query2, "2")==0){
+                printf("Prompt data ID.\n");
+                int idx = 0; scanf("%d", &idx);
+                if(Gudang[query].itm[idx].nama=='\0'){
+                    printf("That ID doesn\'t exist!\n");
+                    continue;
+                }
+                printf("Prompt data name. (Prompt -1 if you do not wish to modify this attribute.)\n");
+                char newname[1000]; scanf("%s", newname);
+                if(strcmp(newname, "-1")!=0) strcpy(Gudang[query].itm[idx].nama, newname);
+                printf("Prompt data stock. (Prompt -1 if you do not wish to modify this attribute.)\n");
+                int stock = 0; scanf("%d", &stock);
+                if(stock!=-1) Gudang[query].itm[idx].stok = stock;
+                nextver++;
+                printf("Data has been successfully modified.\n");
+            }
+            else if(strcmp(query2, "3")==0){
+                printf("Prompt data ID.\n");
+                int idx = 0; scanf("%d", &idx);
+                if(Gudang[query].itm[idx].nama=='\0'){
+                    printf("That ID doesn\'t exist!\n");
+                    continue;
+                }
+                strcpy(Gudang[query].itm[idx].nama, "");
+                Gudang[query].itm[idx].stok = 0;
+                nextver++;
+                printf("Data has been successfully deleted.\n");
+            }
             else if(strcmp(query2, "0")==0) break;
         }
     }
-    nextver++;
 }
 
 void modifyDataGroup(){
@@ -231,6 +269,7 @@ void modifyDataGroup(){
             printf("Prompt group name.\n");
             scanf("%s", Gudang[idx].nama);
             printf("New data group added.\n");
+            nextver++;
         }
         else if(strcmp(query, "2")==0){
             printf("Prompt group Id.\n");
@@ -239,6 +278,7 @@ void modifyDataGroup(){
             for(int i=0; i<1000; i++) Gudang[idx].itm[i].stok = 0;
             strcpy(Gudang[idx].nama, "");
             printf("Data group has been deleted.\n");
+            nextver++;
         }
         else if(strcmp(query, "3")==0) modifyData();
         else if(strcmp(query, "0")==0) break;
