@@ -1,0 +1,37 @@
+0 Beras
+1 Kedelai
+2 Gula
+-1
+0:
+0 Rajalele 35
+1 Karawang 25
+-1
+1:
+0 Lokal 70
+1 Australia 24
+2 Amerika 65
+-1
+2:
+0 Rafinasi 17
+1 Pasir 25
+2Batu 23
+-1
+-1
+
+
+6+1+(maxlenGudang+2)+1+6+1+(maxlenItem+2)+1+1+(maxlenStok+2)
+
+   4+2 +1 +7+2  +1 +4+2 +1  +9+2   +1+2+2
+   
+/----------------------------------------\
+| 0000 | Beras   | 0000 | Rajalele  | 35 |
+| 0000 | Beras   | 0001 | Karawang  | 25 |
+|------+---------+------+-----------+----|
+| 0001 | Kedelai | 0000 | Lokal     | 70 |
+| 0001 | Kedelai | 0001 | Australia | 24 |
+| 0001 | Kedelai | 0002 | Amerika   | 65 |
+|------+---------+------+-----------+----|
+| 0002 | Gula    | 0000 | Rafinasi  | 17 |
+| 0002 | Gula    | 0001 | Pasir     | 25 |
+| 0002 | Gula    | 0002 | Batu      | 23 |
+\----------------------------------------/

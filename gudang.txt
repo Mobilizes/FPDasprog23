@@ -1,0 +1,19 @@
+0 Beras
+1 Kedelai
+2 Gula
+-1
+0:
+0 Rajalele 35
+1 Karawang 25
+-1
+1:
+0 Lokal 70
+1 Australia 24
+2 Amerika 65
+-1
+2:
+0 Rafinasi 17
+1 Pasir 25
+2 Batu 23
+-1
+-1
