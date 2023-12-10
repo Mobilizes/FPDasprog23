@@ -158,6 +158,10 @@ void printOut(){
 void modifyData(){
     while(1){
         // Print the data group available
+        printf("/");
+        for(int i=0; i<4+2+1+(maxlenGudang+2); i++) printf("-");
+        printf("\\\n");
+
         for(int i=0; i<4+2+1+(maxlenGudang+2); i++){
             if(Gudang[i].nama[0]=='\0') continue;
             printf("| %04d |", i);
@@ -165,7 +169,12 @@ void modifyData(){
             for(int k=strlen(Gudang[i].nama); k<=maxlenGudang; k++) printf(" ");
             printf("|\n");
         }
-        printf("Which data group do you want to modify? (-1 to exit current module.)\n");
+
+        printf("\\");
+        for(int i=0; i<4+2+1+(maxlenGudang+2); i++) printf("-");
+        printf("/\n");
+
+        printf("\nWhich data group do you want to modify? (-1 to exit current module.)\n");
         int query; scanf("%d", &query);
         if(query==-1) break;
         if(query<0 && query>1000){
@@ -179,7 +188,7 @@ void modifyData(){
         while(1){
             // Print the roof with length adapted for item.
             printf("/");
-            for(int i=0; i<4+2+1+(maxlenItem+2); i++) printf("-");
+            for(int i=0; i<4+2+1+(maxlenItem+2+1+(maxlenStok+2)); i++) printf("-");
             printf("\\\n");
             
             // Print the data available
@@ -195,7 +204,7 @@ void modifyData(){
 
             // Print the floor with length adapted for item.
             printf("\\");
-            for(int i=0; i<4+2+1+(maxlenItem+2); i++) printf("-");
+            for(int i=0; i<4+2+1+(maxlenItem+2)+1+(maxlenStok+2); i++) printf("-");
             printf("/\n\n");
             
             printf("Please select the command.\n");
@@ -207,7 +216,7 @@ void modifyData(){
             if(strcmp(query2, "1")==0){
                 printf("Prompt data ID.\n");
                 int idx = 0; scanf("%d", &idx);
-                if(Gudang[query].itm[idx].nama!='\0'){
+                if(Gudang[query].itm[idx].nama[0]!='\0'){
                     printf("That ID already exists!\n");
                     continue;
                 }
@@ -217,6 +226,7 @@ void modifyData(){
                 scanf("%d", &Gudang[query].itm[idx].stok);
                 nextver++;
                 printf("Data has been successfully added.\n");
+                updatelenItemStok();
             }
             else if(strcmp(query2, "2")==0){
                 printf("Prompt data ID.\n");
@@ -233,6 +243,7 @@ void modifyData(){
                 if(stock!=-1) Gudang[query].itm[idx].stok = stock;
                 nextver++;
                 printf("Data has been successfully modified.\n");
+                updatelenItemStok();
             }
             else if(strcmp(query2, "3")==0){
                 printf("Prompt data ID.\n");
@@ -245,6 +256,7 @@ void modifyData(){
                 Gudang[query].itm[idx].stok = 0;
                 nextver++;
                 printf("Data has been successfully deleted.\n");
+                updatelenItemStok();
             }
             else if(strcmp(query2, "0")==0) break;
         }
