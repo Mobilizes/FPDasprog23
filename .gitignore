@@ -1,5 +1,4 @@
 .cph/
 *.bin
-*.exe
 *.prob
 .vscode/

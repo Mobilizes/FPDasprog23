@@ -14,7 +14,7 @@
 2:
 0 Rafinasi 17
 1 Pasir 25
-2Batu 23
+2 Batu 23
 -1
 -1
 

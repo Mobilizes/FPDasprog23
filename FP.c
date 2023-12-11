@@ -155,9 +155,27 @@ void printOut(){
     printFloor();
 }
 
+bool addData(int query){
+    printf("Prompt data ID.\n");
+    int idx = 0; scanf("%d", &idx);
+    if(Gudang[query].itm[idx].nama[0]!='\0'){
+        printf("That ID already exists!\n");
+        return false;
+    }
+    printf("Prompt data name.\n");
+    scanf("%s", Gudang[query].itm[idx].nama);
+    printf("Prompt data stock.\n");
+    scanf("%d", &Gudang[query].itm[idx].stok);
+    nextver++;
+    printf("Data has been successfully added.\n");
+    updatelenItemStok();
+    return true;
+}
+
 void modifyData(){
     while(1){
         // Print the data group available
+        printf("\n");
         printf("/");
         for(int i=0; i<4+2+1+(maxlenGudang+2); i++) printf("-");
         printf("\\\n");
@@ -187,6 +205,7 @@ void modifyData(){
         }
         while(1){
             // Print the roof with length adapted for item.
+            printf("\n");
             printf("/");
             for(int i=0; i<4+2+1+(maxlenItem+2+1+(maxlenStok+2)); i++) printf("-");
             printf("\\\n");
@@ -214,19 +233,7 @@ void modifyData(){
             printf("0. Change data group.\n");
             char query2[100]; scanf("%s", query2);
             if(strcmp(query2, "1")==0){
-                printf("Prompt data ID.\n");
-                int idx = 0; scanf("%d", &idx);
-                if(Gudang[query].itm[idx].nama[0]!='\0'){
-                    printf("That ID already exists!\n");
-                    continue;
-                }
-                printf("Prompt data name.\n");
-                scanf("%s", Gudang[query].itm[idx].nama);
-                printf("Prompt data stock.\n");
-                scanf("%d", &Gudang[query].itm[idx].stok);
-                nextver++;
-                printf("Data has been successfully added.\n");
-                updatelenItemStok();
+                addData(query);
             }
             else if(strcmp(query2, "2")==0){
                 printf("Prompt data ID.\n");
@@ -265,6 +272,7 @@ void modifyData(){
 
 void modifyDataGroup(){
     while(1){
+        printf("\n");
         printf("Please select the command.\n");
         printf("1. Add new data group.\n");
         printf("2. Delete a data group.\n");
@@ -281,7 +289,9 @@ void modifyDataGroup(){
             printf("Prompt group name.\n");
             scanf("%s", Gudang[idx].nama);
             printf("New data group added.\n");
-            nextver++;
+            printf("Please add a data to the newly added data group.\n");
+            bool added = addData(idx);
+            while(!added) added = addData(idx);
         }
         else if(strcmp(query, "2")==0){
             printf("Prompt group Id.\n");
@@ -301,20 +311,22 @@ int main()
 {
     readFile();
     while(1){
+        printf("\n");
         printOut();
-        printf("Data version : 1.%d\n\n", nextver);
+        printf("Data version : 1.%d\n", nextver);
+        printf("Current version : 1.%d\n\n", currver);
         printf("Welcome to Gudang FP.\n");
         printf("Please select the command.\n");
-        printf("1. Commit the file.\n");
-        printf("2. Modify the data.\n");
+        printf("1. Modify the data.\n");
+        printf("2. Commit the file.\n");
         printf("3. Reset the changes.\n");
         printf("0. Exit.\n");
         char query[100]; scanf("%s", query);
-        if(strcmp(query, "1")==0) writeFile();
-        else if(strcmp(query, "2")==0) modifyDataGroup();
+        if(strcmp(query, "2")==0) writeFile();
+        else if(strcmp(query, "1")==0) modifyDataGroup();
         else if(strcmp(query, "3")==0) readFile();
         else if(strcmp(query, "0")==0) break;
-        else printf("Invalid input! Try again.\n");
+        else printf("Invalid input! Try agains.\n");
         printf("\n");
     }
     printf("The program has been closed successfully.\n");
