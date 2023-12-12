@@ -155,6 +155,49 @@ void printOut(){
     printFloor();
 }
 
+void printDataGroup(){
+    printf("\n");
+    printf("/");
+    for(int i=0; i<4+2+1+(maxlenGudang+2); i++) printf("-");
+    printf("\\\n");
+
+    for(int i=0; i<4+2+1+(maxlenGudang+2); i++){
+        if(Gudang[i].nama[0]=='\0') continue;
+        printf("| %04d |", i);
+        printf(" %s", Gudang[i].nama);
+        for(int k=strlen(Gudang[i].nama); k<=maxlenGudang; k++) printf(" ");
+        printf("|\n");
+    }
+
+    printf("\\");
+    for(int i=0; i<4+2+1+(maxlenGudang+2); i++) printf("-");
+    printf("/\n");
+}
+
+void printData(int query){
+    // Print the roof with length adapted for item.
+    printf("\n");
+    printf("/");
+    for(int i=0; i<4+2+1+(maxlenItem+2+1+(maxlenStok+2)); i++) printf("-");
+    printf("\\\n");
+    
+    // Print the data available
+    for(int i=0; i<1000; i++){
+        if(Gudang[query].itm[i].nama[0]=='\0') continue;
+        printf("| %04d |", i);
+        printf(" %s", Gudang[query].itm[i].nama);
+        for(int k=strlen(Gudang[query].itm[i].nama); k<=maxlenItem; k++) printf(" ");
+        printf("| %d", Gudang[query].itm[i].stok);
+        for(int k=checkDigit(Gudang[query].itm[i].stok); k<=maxlenStok; k++) printf(" ");
+        printf("|\n");
+    }
+
+    // Print the floor with length adapted for item.
+    printf("\\");
+    for(int i=0; i<4+2+1+(maxlenItem+2)+1+(maxlenStok+2); i++) printf("-");
+    printf("/\n\n");
+}
+
 bool addData(int query){
     printf("Prompt data ID.\n");
     int idx = 0; scanf("%d", &idx);
@@ -175,23 +218,7 @@ bool addData(int query){
 void modifyData(){
     while(1){
         // Print the data group available
-        printf("\n");
-        printf("/");
-        for(int i=0; i<4+2+1+(maxlenGudang+2); i++) printf("-");
-        printf("\\\n");
-
-        for(int i=0; i<4+2+1+(maxlenGudang+2); i++){
-            if(Gudang[i].nama[0]=='\0') continue;
-            printf("| %04d |", i);
-            printf(" %s", Gudang[i].nama);
-            for(int k=strlen(Gudang[i].nama); k<=maxlenGudang; k++) printf(" ");
-            printf("|\n");
-        }
-
-        printf("\\");
-        for(int i=0; i<4+2+1+(maxlenGudang+2); i++) printf("-");
-        printf("/\n");
-
+        printDataGroup();
         printf("\nWhich data group do you want to modify? (-1 to exit current module.)\n");
         int query; scanf("%d", &query);
         if(query==-1) break;
@@ -204,28 +231,7 @@ void modifyData(){
             continue;
         }
         while(1){
-            // Print the roof with length adapted for item.
-            printf("\n");
-            printf("/");
-            for(int i=0; i<4+2+1+(maxlenItem+2+1+(maxlenStok+2)); i++) printf("-");
-            printf("\\\n");
-            
-            // Print the data available
-            for(int i=0; i<1000; i++){
-                if(Gudang[query].itm[i].nama[0]=='\0') continue;
-                printf("| %04d |", i);
-                printf(" %s", Gudang[query].itm[i].nama);
-                for(int k=strlen(Gudang[query].itm[i].nama); k<=maxlenItem; k++) printf(" ");
-                printf("| %d", Gudang[query].itm[i].stok);
-                for(int k=checkDigit(Gudang[query].itm[i].stok); k<=maxlenStok; k++) printf(" ");
-                printf("|\n");
-            }
-
-            // Print the floor with length adapted for item.
-            printf("\\");
-            for(int i=0; i<4+2+1+(maxlenItem+2)+1+(maxlenStok+2); i++) printf("-");
-            printf("/\n\n");
-            
+            printData(query);
             printf("Please select the command.\n");
             printf("1. Add a data.\n");
             printf("2. Modify a data.\n");
@@ -264,6 +270,14 @@ void modifyData(){
                 nextver++;
                 printf("Data has been successfully deleted.\n");
                 updatelenItemStok();
+                bool empty = true;
+                for(int i=0; i<1000; i++){
+                    if(Gudang[query].itm[i].nama[0]!='\0') empty = true;
+                }
+                if(empty){
+                    strcpy(Gudang[query].nama, "");
+                    printf("The data group is empty; Data group has been deleted.\n");
+                }
             }
             else if(strcmp(query2, "0")==0) break;
         }
@@ -272,7 +286,7 @@ void modifyData(){
 
 void modifyDataGroup(){
     while(1){
-        printf("\n");
+        printDataGroup();
         printf("Please select the command.\n");
         printf("1. Add new data group.\n");
         printf("2. Delete a data group.\n");
@@ -288,8 +302,8 @@ void modifyDataGroup(){
             }
             printf("Prompt group name.\n");
             scanf("%s", Gudang[idx].nama);
-            printf("New data group added.\n");
-            printf("Please add a data to the newly added data group.\n");
+            printf("New data group added.\n\n");
+            printf("Please add a data to the newly added data group.\n\n");
             bool added = addData(idx);
             while(!added) added = addData(idx);
         }
@@ -326,7 +340,7 @@ int main()
         else if(strcmp(query, "1")==0) modifyDataGroup();
         else if(strcmp(query, "3")==0) readFile();
         else if(strcmp(query, "0")==0) break;
-        else printf("Invalid input! Try agains.\n");
+        else printf("Invalid input! Try again.\n");
         printf("\n");
     }
     printf("The program has been closed successfully.\n");

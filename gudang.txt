@@ -1,6 +1,6 @@
 0 Beras
 1 Kedelai
-4 Game
+2 Gula
 -1
 0:
 0 Rajalele 35
@@ -11,7 +11,9 @@
 1 Australia 24
 2 Amerika 65
 -1
-4:
-0 Pikmin 52
+2:
+0 Rafinasi 17
+1 Pasir 25
+2 Batu 23
 -1
 -1
