@@ -302,6 +302,10 @@ void modifyDataGroup(int *pointer, int *group){
     updated = false;
 }
 
+void wrongFormat(){
+    strcpy(errorMsg, "gudang.txt is not on correct format!");
+}
+
 void readFile(){
     int i=0, j=0;
     for(i=0; i<=1000; i++){
@@ -312,19 +316,45 @@ void readFile(){
         }
     }
     FILE *fptr;
-    fptr = fopen("gudang.txt", "r");
+    fptr = fopen("gudang.txt", "r+");
+    if(fptr==NULL){
+
+    }
     int idx = 0;
+    fscanf(fptr, "%d ", &idx);
+    if(idx==-1){
+        wrongFormat();
+        return;
+    } else fscanf(fptr, "%s", &Gudang[idx].nama);
+
     while(1){
-        fscanf(fptr, "%d ", &idx);
+        if(fscanf(fptr, "%d ", &idx)==EOF){
+            wrongFormat();
+            return;
+        }
         if(idx==-1) break;
         fscanf(fptr, "%s", &Gudang[idx].nama);
     }
+
     while(1){
-        fscanf(fptr, "%d:\n", &idx);
-        // printf("%d\n", idx);
+        if(fscanf(fptr, "%d ", &idx)==EOF){
+            fprintf(fptr, "-1");
+            wrongFormat();
+            return;
+        }
         if(idx==-1) break;
+        if(Gudang[idx].nama[0]=='\0'){
+            fprintf(fptr, "-1");
+            wrongFormat();
+            return;
+        }
         while(1){
-            int i; fscanf(fptr, "%d ", &i);
+            int i;
+            if(fscanf(fptr, "%d ", &i)==EOF){
+                fprintf(fptr, "-1");
+                wrongFormat();
+                return;
+            }
             if(i==-1) break;
             fscanf(fptr, "%s %d", Gudang[idx].itm[i].nama, &Gudang[idx].itm[i].stok);
         }
@@ -362,6 +392,18 @@ void writeFile(){
     strcpy(errorMsg, "Data has successfully been written.");
 }
 
+void getBackup(){
+    FILE *fptr1, *fptr2;
+    fptr1 = fopen("gudang.txt", "w");
+    fptr2 = fopen("backup.txt", "r");
+    char c;
+    while (fscanf(fptr2, "%c", &c) != EOF){ 
+        fprintf(fptr1, "%c", c);
+    }
+    fclose(fptr1);
+    fclose(fptr2);
+}
+
 int main()
 {
     int pointer = 0;
@@ -369,6 +411,16 @@ int main()
     int selectedID = 0;
     bool groupToggle = false;
     readFile();
+    if(strcmp(errorMsg, "gudang.txt is not on correct format!")==0){
+        // clear;
+        printf(red"%s\n"white, errorMsg);
+        printf("Do you wish to use a backup? ("green"Y"white"/"red"N"white")\n");
+        int query = getch();
+        if(query=='Y' || query=='y') getBackup();
+        else return 0;
+        readFile();
+        strcpy(errorMsg, "gudang.txt\'s data is lost.");
+    }
     updateTotalData();
     while(1){
         if(!groupToggle) printOut(&pointer, &selectedGroup, &selectedID);
