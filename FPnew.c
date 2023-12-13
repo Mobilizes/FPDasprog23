@@ -14,25 +14,67 @@
 #define purple "\033[0;35m"
 #define cyan "\033[0;36m"
 #define white "\033[0;37m"
+#define clear system("cls")
 
 typedef long long ll;
 typedef struct{
-    char nama[1000];
+    char nama[1001];
     int stok;
 } item;
 typedef struct{
-    char nama[1000];
-    item itm[1000];
+    char nama[1001];
+    item itm[1001];
 } gudang;
 
-gudang Gudang[1000];
+gudang Gudang[1001];
 bool updated = true;
 int maxlenGudang = 0;
 int maxlenItem = 0;
 int maxlenStok = 0;
-int bigGudang = 0;
 int tableLen = 0;
 int totalData = 0;
+int totalDataGroup = 0;
+char errorMsg[1001] = "";
+
+void updateTotalData(){
+    totalData = 0;
+    totalDataGroup = 0;
+    for(int i=0; i<1000; i++){
+        if(Gudang[i].nama[0]=='\0') continue;
+        totalDataGroup++;
+        for(int j=0; j<1000; j++){
+            if(Gudang[i].itm[j].nama[0]=='\0') continue;
+            totalData++;
+        }
+    }
+}
+
+void updatelenGudang(){
+    for(int i=0; i<1000; i++){
+        if(Gudang[i].nama[0]=='\0') continue;
+        maxlenGudang = max(maxlenGudang, strlen(Gudang[i].nama));
+    }
+}
+
+int checkDigit(int n){
+    int res = 0;
+    while(n > 0){
+        n /= 10;
+        res++;
+    }
+    return res;
+}
+
+void updatelenItemStok(){
+    for(int i=0; i<1000; i++){
+        if(Gudang[i].nama[0]=='\0') continue;
+        for(int j=0; j<1000; j++){
+            if(Gudang[i].itm[j].nama[0]=='\0') continue;
+            maxlenItem = max(maxlenItem, strlen(Gudang[i].itm[j].nama));
+            maxlenStok = max(maxlenStok, checkDigit(Gudang[i].itm[j].stok));
+        }
+    }
+}
 
 void readFile(){
     FILE *fptr;
@@ -55,21 +97,22 @@ void readFile(){
     }
     fclose(fptr);
     updated = true;
-    printf(red"File has been read successfully.\n\n"white);
+    updateTotalData();
+    strcpy(errorMsg, "File has been read successfully.");
 }
 
 void writeFile(){
     FILE *fptr;
     fptr = fopen("gudang.txt", "w");
-    for(int i=0; i<1000; i++){
+    for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
         fprintf(fptr, "%d %s\n", i, Gudang[i].nama);
     }
     fprintf(fptr, "-1\n");
-    for(int i=0; i<1000; i++){
+    for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
         fprintf(fptr, "%d:\n", i);
-        for(int j=0; j<1000; j++){
+        for(int j=0; j<=1000; j++){
             if(Gudang[i].itm[j].nama[0]=='\0') continue;
             fprintf(fptr, "%d %s %d\n", j, Gudang[i].itm[j].nama, Gudang[i].itm[j].stok);
         }
@@ -79,76 +122,35 @@ void writeFile(){
     // fprintf(fptr, "test\n");
     fclose(fptr);
     updated = true;
-    printf(red"Data has been written successfully.\n\n"white);
+    strcpy(errorMsg, "Data has been written successfully.");
 }
 
-int checkDigit(int n){
-    int res = 0;
-    while(n > 0){
-        n /= 10;
-        res++;
-    }
-    return res;
-}
-
-void updatelenGudang(){
-    for(int i=0; i<1000; i++){
-        if(Gudang[i].nama[0]=='\0') continue;
-        maxlenGudang = max(maxlenGudang, strlen(Gudang[i].nama));
-        bigGudang = i;
-    }
-}
-
-void updatelenItemStok(){
-    for(int i=0; i<1000; i++){
-        if(Gudang[i].nama[0]=='\0') continue;
-        for(int j=0; j<1000; j++){
-            if(Gudang[i].itm[j].nama[0]=='\0') continue;
-            maxlenItem = max(maxlenItem, strlen(Gudang[i].itm[j].nama));
-            maxlenStok = max(maxlenStok, checkDigit(Gudang[i].itm[j].stok));
-        }
-    }
-}
-
-void printRoof(){
-    tableLen = 4+2+1+(maxlenGudang+2)+1+4+2+1+(maxlenItem+2)+1+(maxlenStok+2);
+void printRoof(int tableLen){
     printf(cyan"/");
     for(int i=0; i<tableLen; i++) printf("-");
     printf("\\\n"white);
 }
 
-void printFloor(){
-    tableLen = 4+2+1+(maxlenGudang+2)+1+4+2+1+(maxlenItem+2)+1+(maxlenStok+2);
+void printFloor(int tableLen){
     printf(cyan"\\");
     for(int i=0; i<tableLen; i++) printf("-");
     printf("/\n"white);
 }
 
-void printOut(int *pointer){
+void printOut(int *pointer, int *selectedGroup, int *selectedData){
+    clear;
     updatelenGudang();
     updatelenItemStok();
-    printRoof();
+    printRoof(4+2+1+(maxlenGudang+2)+1+4+2+1+(maxlenItem+2)+1+(maxlenStok+2));
     // Print the data with table format
-    const char colors[4][10] = {red, yellow, green, white};
+    const char colors[4][10] = {red, purple, green, white};
     int coloridx = 0;
     int curridx = 0;
-    for(int i=0; i<1000; i++){
+    for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
-        for(int j=0; j<1000; j++){
-            if(Gudang[i].itm[j].nama[0]=='\0' && j!=1000-1) continue;
-            // Print the divider of each data group to make the table more readable
-            if(j==1000-1 && Gudang[i].itm[j].nama[0]=='\0'){
-                // If at the end of the table, no need to print divider
-                if(i==bigGudang) continue;
-                printf(cyan"|");
-                for(int k=0; k<tableLen; k++){
-                    if(k==6 || k==6+maxlenGudang+2+1 || k==6+maxlenGudang+2+6+2 || k==6+maxlenGudang+2+6+maxlenItem+2+3) printf("+");
-                    else printf("-");
-                }
-                printf("|\n"white);
-                continue;
-            }
-            int temp = coloridx;
+        int temp = coloridx;
+        for(int j=0; j<=1000; j++){
+            if(Gudang[i].itm[j].nama[0]=='\0') continue;
             if(curridx==*pointer) coloridx = 3;
             // Adapt the spaces accordingly
             printf(cyan"|%s %04d " cyan"|", colors[coloridx], i);
@@ -160,7 +162,11 @@ void printOut(int *pointer){
             printf(cyan"|%s %d"cyan, colors[coloridx], Gudang[i].itm[j].stok);
             for(int k=checkDigit(Gudang[i].itm[j].stok); k<=maxlenStok; k++) printf(" ");
             printf("|"white);
-            if(curridx==*pointer) printf(" <--");
+            if(curridx==*pointer){
+                printf(" <--");
+                *selectedGroup = i;
+                *selectedData = j;
+            }
             printf("\n");
             curridx++;
             coloridx = temp;
@@ -168,66 +174,142 @@ void printOut(int *pointer){
         coloridx++;
         if(coloridx==3) coloridx = 0;
     }
-    printFloor();
+    printFloor(4+2+1+(maxlenGudang+2)+1+4+2+1+(maxlenItem+2)+1+(maxlenStok+2));
 }
 
-void updateTotalData(){
-    totalData = 0;
-    for(int i=0; i<1000; i++){
+void printDataGroup(int *pointer, int *selectedGroup){
+    clear;
+    int curridx = 0;
+    const char colors[4][10] = {red, purple, green, white};
+    int coloridx = 0;
+    int temp = 0;
+    printRoof(4+2+1+(maxlenGudang+2));
+    for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
-        for(int j=0; j<1000; j++){
-            if(Gudang[i].itm[j].nama[0]=='\0') continue;
-            totalData++;
+        temp = coloridx;
+        if(curridx==*pointer) coloridx = 3;
+        printf(blue"|%s %04d "blue"|", colors[coloridx], i);
+        printf("%s %s", colors[coloridx], Gudang[i].nama);
+        for(int k=strlen(Gudang[i].nama); k<=maxlenGudang; k++) printf(" ");
+        printf(blue"|"white);
+        if(curridx==*pointer){
+            printf(" <--");
+            *selectedGroup = i;
         }
+        printf("\n");
+        curridx++;
+        coloridx = temp;
+        coloridx++;
+        if(coloridx==3) coloridx = 0;
     }
+    printFloor(4+2+1+(maxlenGudang+2));
 }
 
-bool addData(int query){
+void addData(){
+    int trash = -1;
+    printOut(&trash, &trash, &trash);
+    printf("Prompt data group ID.\n");
+    int group;
+    if(scanf("%d", &group)!=1){
+        strcpy(errorMsg, "Invalid input!");
+        fflush(stdin);
+        return;
+    }
+    fflush(stdin);
+    if(group>1000){
+        strcpy(errorMsg, "Too big of an input! Please keep it within 0 to 1000 inclusive.");
+        return;
+    }
+    if(Gudang[group].nama[0]=='\0'){
+        strcpy(errorMsg, "That ID doesn\'t exist!");
+        fflush(stdin);
+        return;
+    }
     printf("Prompt data ID.\n");
-    int idx = 0; scanf("%d", &idx);
-    if(Gudang[query].itm[idx].nama[0]!='\0'){
-        printf("That ID already exists!\n");
-        return false;
+    int idx;
+    if(scanf("%d", &idx)!=1){
+        strcpy(errorMsg, "Invalid input!");
+        return;
+    }
+    if(idx>1000){
+        strcpy(errorMsg, "Too big of an input! Please keep it within 0 to 1000 inclusive.");
+        return;
+    }
+    fflush(stdin);
+    if(Gudang[group].itm[idx].nama[0]!='\0'){
+        strcpy(errorMsg, "That ID already exists!");
+        return;
     }
     printf("Prompt data name.\n");
-    scanf("%s", Gudang[query].itm[idx].nama);
+    scanf("%s", Gudang[group].itm[idx].nama);
     printf("Prompt data stock.\n");
-    scanf("%d", &Gudang[query].itm[idx].stok);
-    printf("Data has been successfully added.\n");
+    scanf("%d", &Gudang[group].itm[idx].stok);
     updatelenItemStok();
-    return true;
+    updateTotalData();
+    updated = false;
+    strcpy(errorMsg, "The new data has been added successfully.");
+}
+
+void deleteData(int *group, int *data){
+    strcpy(Gudang[*group].itm[*data].nama, "");
+    Gudang[*group].itm[*data].stok = 0;
+    updated = false;
+    updatelenItemStok();
+    updateTotalData();
+    strcpy(errorMsg, "The selected data has been deleted successfully.");
+}
+
+void deleteDataGroup(int *group){
+    strcpy(Gudang[*group].nama, "");
+    for(int data=0; data<=1000; data++) deleteData(group, &data);
+    updatelenGudang();
+    strcpy(errorMsg, "The selected data group has been deleted successfully.");
 }
 
 int main()
 {
     int pointer = 0;
+    int selectedGroup = 0;
+    int selectedID = 0;
+    bool groupToggle = false;
     readFile();
     updateTotalData();
     while(1){
-        system("cls");
-        printOut(&pointer);
-        printf(blue"Data is%sup to date with the file.\n\n"purple, (updated ? " " : red" NOT "blue));
-        printf("M. Modify selected data.\n");
-        printf("D. Delete selected data.\n");
-        printf("A. Add new data.\n");
-        printf("C. Commit changes to file.\n");
+        if(!groupToggle) printOut(&pointer, &selectedGroup, &selectedID);
+        else printDataGroup(&pointer, &selectedGroup);
+        printf(blue"The data are%sup to date with the file.\n\n"white, (updated ? " " : red" NOT "blue));
+        printf("1. Modify selected data%s\n", groupToggle ? " group." : ".");
+        printf("2. Delete selected data%s\n", groupToggle ? " group." : ".");
+        printf("3. Add new data%s\n", groupToggle ? " group." : ".");
+        printf("T. Toggle to %s\n", groupToggle ? "singular." : "group.");
         printf("R. Reset changes.\n");
+        printf("C. Commit changes to file.\n");
         printf("Esc. Exit the program.\n\n");
+        printf(red"%s\n"white, errorMsg);
+        strcpy(errorMsg, "");
         int query = getch();
         if(query==0 || query==224){
             int dir = getch();
             if(dir==72) pointer--;
-            if(dir==80) pointer++;
+            else if(dir==80) pointer++;
+            else strcpy(errorMsg, "Invalid input!");
             pointer = max(0, pointer);
-            pointer = min(pointer, totalData-1);
+            pointer = min(pointer, (groupToggle ? totalDataGroup-1 : totalData-1));
         } else{
-            if(query=='m' || query=='M');
-            else if(query=='d' || query=='D');
-            else if(query=='a' || query=='A');
-            else if(query=='c' || query=='C') writeFile();
-            else if(query=='r' || query=='R') readFile();
+            if(query=='1');
+            else if(query=='2'){
+                if(groupToggle) deleteDataGroup(&selectedGroup);
+                else deleteData(&selectedGroup, &selectedID);
+            }
+            else if(query=='3') addData();
+            else if(query=='T' || query=='t'){
+                groupToggle = !groupToggle;
+                pointer = 0;
+            }
+            else if(query=='C' || query=='c') writeFile();
+            else if(query=='R' || query=='r') readFile();
             else if(query==27) break;
-            else printf("Invalid Input!\n");
+            else strcpy(errorMsg, "Invalid input!");
         }
     }
     printf(red"Program has successfully been exited.\n");
