@@ -277,6 +277,7 @@ void modifyData(){
                 if(empty){
                     strcpy(Gudang[query].nama, "");
                     printf("The data group is empty; Data group has been deleted.\n");
+                    break;
                 }
             }
             else if(strcmp(query2, "0")==0) break;
