@@ -39,10 +39,10 @@ char errorMsg[1001] = "";
 void updateTotalData(){
     totalData = 0;
     totalDataGroup = 0;
-    for(int i=0; i<1000; i++){
+    for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
         totalDataGroup++;
-        for(int j=0; j<1000; j++){
+        for(int j=0; j<=1000; j++){
             if(Gudang[i].itm[j].nama[0]=='\0') continue;
             totalData++;
         }
@@ -50,7 +50,7 @@ void updateTotalData(){
 }
 
 void updatelenGudang(){
-    for(int i=0; i<1000; i++){
+    for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
         maxlenGudang = max(maxlenGudang, strlen(Gudang[i].nama));
     }
@@ -66,63 +66,14 @@ int checkDigit(int n){
 }
 
 void updatelenItemStok(){
-    for(int i=0; i<1000; i++){
+    for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
-        for(int j=0; j<1000; j++){
+        for(int j=0; j<=1000; j++){
             if(Gudang[i].itm[j].nama[0]=='\0') continue;
             maxlenItem = max(maxlenItem, strlen(Gudang[i].itm[j].nama));
             maxlenStok = max(maxlenStok, checkDigit(Gudang[i].itm[j].stok));
         }
     }
-}
-
-void readFile(){
-    FILE *fptr;
-    fptr = fopen("gudang.txt", "r");
-    int idx = 0;
-    while(1){
-        fscanf(fptr, "%d ", &idx);
-        if(idx==-1) break;
-        fscanf(fptr, "%s", &Gudang[idx].nama);
-    }
-    while(1){
-        fscanf(fptr, "%d:\n", &idx);
-        // printf("%d\n", idx);
-        if(idx==-1) break;
-        while(1){
-            int i; fscanf(fptr, "%d ", &i);
-            if(i==-1) break;
-            fscanf(fptr, "%s %d", Gudang[idx].itm[i].nama, &Gudang[idx].itm[i].stok);
-        }
-    }
-    fclose(fptr);
-    updated = true;
-    updateTotalData();
-    strcpy(errorMsg, "File has successfully been read.");
-}
-
-void writeFile(){
-    FILE *fptr;
-    fptr = fopen("gudang.txt", "w");
-    for(int i=0; i<=1000; i++){
-        if(Gudang[i].nama[0]=='\0') continue;
-        fprintf(fptr, "%d %s\n", i, Gudang[i].nama);
-    }
-    fprintf(fptr, "-1\n");
-    for(int i=0; i<=1000; i++){
-        if(Gudang[i].nama[0]=='\0') continue;
-        fprintf(fptr, "%d:\n", i);
-        for(int j=0; j<=1000; j++){
-            if(Gudang[i].itm[j].nama[0]=='\0') continue;
-            fprintf(fptr, "%d %s %d\n", j, Gudang[i].itm[j].nama, Gudang[i].itm[j].stok);
-        }
-        fprintf(fptr, "-1\n");
-    }
-    fprintf(fptr, "-1\n");
-    // fprintf(fptr, "test\n");
-    fclose(fptr);
-    updated = true;
-    strcpy(errorMsg, "Data has successfully been written.");
 }
 
 void printRoof(int tableLen){
@@ -209,7 +160,7 @@ void printDataGroup(int *pointer, int *selectedGroup){
     printFloor(4+2+1+(maxlenGudang+2));
 }
 
-void printSpecificGroup(int *pointer, int *selectedGroup){
+void printSpecificGroup(int *selectedGroup, int *selectedData){
     clear;
     int curridx = 0;
     const char colors[4][10] = {red, purple, green, white};
@@ -219,7 +170,7 @@ void printSpecificGroup(int *pointer, int *selectedGroup){
     for(int i=0; i<=1000; i++){
         if(Gudang[*selectedGroup].itm[i].nama[0]=='\0') continue;
         temp = coloridx;
-        if(curridx==*pointer) coloridx = 3;
+        if(curridx==*selectedData) coloridx = 3;
 
         printf(cyan"|%s %04d " cyan"|", colors[coloridx], i);
         printf("%s %s"white, colors[coloridx], Gudang[*selectedGroup].itm[i].nama);
@@ -229,10 +180,12 @@ void printSpecificGroup(int *pointer, int *selectedGroup){
         for(int k=checkDigit(Gudang[*selectedGroup].itm[i].stok); k<=maxlenStok; k++) printf(" ");
         printf("|"white);
 
-        if(curridx==*pointer) printf(" <--");
+        if(curridx==*selectedData) printf(" <--");
         printf("\n");
         curridx++;
         coloridx = temp;
+        coloridx++;
+        if(coloridx==3) coloridx = 0;
     }
     printFloor(4+2+1+(maxlenItem+2)+1+(maxlenStok+2));
 }
@@ -280,9 +233,9 @@ void addData(){
 void deleteData(int *group, int *data){
     strcpy(Gudang[*group].itm[*data].nama, "");
     Gudang[*group].itm[*data].stok = 0;
-    updated = false;
     updatelenItemStok();
     updateTotalData();
+    updated = false;
     strcpy(errorMsg, "The selected data has successfully been deleted.");
 }
 
@@ -294,8 +247,8 @@ void deleteDataGroup(int *group){
 }
 
 void modifyData(int *pointer, int *group, int *data){
-    int trash = -1;
-    printSpecificGroup(pointer, group);
+    printSpecificGroup(group, data);
+
     printf("Prompt new ID. (-1 to leave unchanged.)\n");
     int ID; if(!inputNum(&ID)) return;
     if(ID!=-1){
@@ -307,20 +260,106 @@ void modifyData(int *pointer, int *group, int *data){
         Gudang[*group].itm[ID].stok = Gudang[*group].itm[*data].stok;
         deleteData(group, data);
     } else ID = *data;
+
     printf("Prompt new name. (-1 to leave unchanged.)\n");
-    char name[1001];
-    scanf("%s", name);
+    char name[1001]; scanf("%s", name);
     fflush(stdin);
     if(strcmp(name, "-1")!=0) strcpy(Gudang[*group].itm[ID].nama, name);
+
     printf("Prompt updated stock. (-1 to leave unchanged.)\n");
     int stock; if(!inputNum(&stock)) return;
     if(stock!=-1) Gudang[*group].itm[ID].stok = stock;
+
     strcpy(errorMsg, "The selected data has successfully been modified.");
     updated = false;
 }
 
 void modifyDataGroup(int *pointer, int *group){
-    
+    printDataGroup(pointer, group);
+
+    printf("Prompt new ID. (-1 to leave unchanged.)\n");
+    int ID; if(!inputNum(&ID)) return;
+    if(ID!=-1){
+        if(Gudang[ID].nama[0]!='\0'){
+            strcpy(errorMsg, "That ID already exists!");
+            return;
+        }
+        strcpy(Gudang[ID].nama, Gudang[*group].nama);
+        for(int i=0; i<=1000; i++){
+            if(Gudang[*group].itm[i].nama[0]=='\0') continue;
+            strcpy(Gudang[ID].itm[i].nama, Gudang[*group].itm[i].nama);
+            Gudang[ID].itm[i].stok = Gudang[*group].itm[i].stok;
+        }
+        deleteDataGroup(group);
+    } else ID = *group;
+
+    printf("Prompt new name. (-1 to leave unchanged.)\n");
+    char name[1001]; scanf("%s", name);
+    fflush(stdin);
+    if(strcmp(name, "-1")!=0) strcpy(Gudang[*group].itm[ID].nama, name);
+
+    strcpy(errorMsg, "The selected data group has successfully been modified.");
+    updated = false;
+}
+
+void readFile(){
+    int i=0, j=0;
+    for(i=0; i<=1000; i++){
+        strcpy(Gudang[i].nama, "");
+        for(j=0; j<=1000; j++){
+            strcpy(Gudang[i].itm[j].nama, "");
+            Gudang[i].itm[j].stok = 0;
+        }
+    }
+    FILE *fptr;
+    fptr = fopen("gudang.txt", "r");
+    int idx = 0;
+    while(1){
+        fscanf(fptr, "%d ", &idx);
+        if(idx==-1) break;
+        fscanf(fptr, "%s", &Gudang[idx].nama);
+    }
+    while(1){
+        fscanf(fptr, "%d:\n", &idx);
+        // printf("%d\n", idx);
+        if(idx==-1) break;
+        while(1){
+            int i; fscanf(fptr, "%d ", &i);
+            if(i==-1) break;
+            fscanf(fptr, "%s %d", Gudang[idx].itm[i].nama, &Gudang[idx].itm[i].stok);
+        }
+    }
+    fclose(fptr);
+
+    updated = true;
+    updatelenGudang();
+    updatelenItemStok();
+    updateTotalData();
+    strcpy(errorMsg, "File has successfully been read.");
+}
+
+void writeFile(){
+    FILE *fptr;
+    fptr = fopen("gudang.txt", "w");
+    for(int i=0; i<=1000; i++){
+        if(Gudang[i].nama[0]=='\0') continue;
+        fprintf(fptr, "%d %s\n", i, Gudang[i].nama);
+    }
+    fprintf(fptr, "-1\n");
+    for(int i=0; i<=1000; i++){
+        if(Gudang[i].nama[0]=='\0') continue;
+        fprintf(fptr, "%d:\n", i);
+        for(int j=0; j<=1000; j++){
+            if(Gudang[i].itm[j].nama[0]=='\0') continue;
+            fprintf(fptr, "%d %s %d\n", j, Gudang[i].itm[j].nama, Gudang[i].itm[j].stok);
+        }
+        fprintf(fptr, "-1\n");
+    }
+    fprintf(fptr, "-1\n");
+    // fprintf(fptr, "test\n");
+    fclose(fptr);
+    updated = true;
+    strcpy(errorMsg, "Data has successfully been written.");
 }
 
 int main()
@@ -354,7 +393,7 @@ int main()
             pointer = min(pointer, (groupToggle ? totalDataGroup-1 : totalData-1));
         } else{
             if(query=='1'){
-                if(groupToggle) deleteDataGroup(&selectedGroup);
+                if(groupToggle) modifyDataGroup(&pointer, &selectedGroup);
                 else modifyData(&pointer, &selectedGroup, &selectedID);
             }
             else if(query=='2'){
