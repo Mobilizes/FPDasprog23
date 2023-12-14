@@ -299,23 +299,18 @@ void modifyData(int *group, int *data){
     printSpecificGroup(group, data);
     printf("Prompt new ID. (-1 to leave unchanged.)\n");
     int ID; 
-    bool flag = false;
-    while(flag = !inputNum(&ID)){
-        if(ID!=-1 && Gudang[*group].itm[ID].nama!='\0'){
-            strcpy(errorMsg, "That ID already exists!");
-            printError;
-            flag = false;
-            continue;
-        }
+    while((!inputNum(&ID) || Gudang[*group].itm[ID].nama[0]!='\0') && ID != -1){
+        if(Gudang[*group].itm[ID].nama[0]!='\0') strcpy(errorMsg, "That ID already exists!");
         printError;
         printf("Prompt new ID.\n");
     }
 
-    strcpy(Gudang[*group].itm[ID].nama, Gudang[*group].itm[*data].nama);
-    Gudang[*group].itm[ID].stok = Gudang[*group].itm[*data].stok;
-    deleteData(group, data);
-
-    ID = *data;
+    if(ID==-1) ID = *data;
+    else{
+        strcpy(Gudang[*group].itm[ID].nama, Gudang[*group].itm[*data].nama);
+        Gudang[*group].itm[ID].stok = Gudang[*group].itm[*data].stok;
+        deleteData(group, data);
+    }
 
     printf("Prompt new name. (-1 to leave unchanged.)\n");
     char name[1001]; scanf("%s", name);
