@@ -230,8 +230,13 @@ void addData(){
     strcpy(errorMsg, "The new data has successfully been added.");
 }
 
+void addDataGroup(){
+    int trash = -1;
+
+}
+
 void deleteData(int *group, int *data){
-    strcpy(Gudang[*group].itm[*data].nama, "");
+    strcpy(Gudang[*group].itm[*data].nama, "\0");
     Gudang[*group].itm[*data].stok = 0;
     updatelenItemStok();
     updateTotalData();
@@ -240,7 +245,7 @@ void deleteData(int *group, int *data){
 }
 
 void deleteDataGroup(int *group){
-    strcpy(Gudang[*group].nama, "");
+    strcpy(Gudang[*group].nama, "\0");
     for(int data=0; data<=1000; data++) deleteData(group, &data);
     updatelenGudang();
     strcpy(errorMsg, "The selected data group has successfully been deleted.");
@@ -248,10 +253,13 @@ void deleteDataGroup(int *group){
 
 void modifyData(int *pointer, int *group, int *data){
     printSpecificGroup(group, data);
-
     printf("Prompt new ID. (-1 to leave unchanged.)\n");
     int ID; if(!inputNum(&ID)) return;
     if(ID!=-1){
+        if(Gudang[*group].itm[ID].nama[0]=='\0'){
+            strcpy(errorMsg, "That ID doesn\'t exist!");
+            return;
+        }
         if(Gudang[*group].itm[ID].nama[0]!='\0'){
             strcpy(errorMsg, "That ID already exists!");
             return;
@@ -280,6 +288,10 @@ void modifyDataGroup(int *pointer, int *group){
     printf("Prompt new ID. (-1 to leave unchanged.)\n");
     int ID; if(!inputNum(&ID)) return;
     if(ID!=-1){
+        if(Gudang[*group].itm[ID].nama[0]=='\0'){
+            strcpy(errorMsg, "That ID doesn\'t exist!");
+            return;
+        }
         if(Gudang[ID].nama[0]!='\0'){
             strcpy(errorMsg, "That ID already exists!");
             return;
@@ -304,6 +316,30 @@ void modifyDataGroup(int *pointer, int *group){
 
 void wrongFormat(){
     strcpy(errorMsg, "gudang.txt is not on correct format!");
+}
+
+void writeBackup(){
+    FILE *fptr1, *fptr2;
+    fptr1 = fopen("gudang.txt", "r");
+    fptr2 = fopen("backup.txt", "w");
+    char c;
+    while (fscanf(fptr1, "%c", &c) != EOF){ 
+        fprintf(fptr2, "%c", c);
+    }
+    fclose(fptr1);
+    fclose(fptr2);
+}
+
+void getBackup(){
+    FILE *fptr1, *fptr2;
+    fptr1 = fopen("gudang.txt", "w");
+    fptr2 = fopen("backup.txt", "r");
+    char c;
+    while (fscanf(fptr2, "%c", &c) != EOF){ 
+        fprintf(fptr1, "%c", c);
+    }
+    fclose(fptr1);
+    fclose(fptr2);
 }
 
 void readFile(){
@@ -406,18 +442,7 @@ void writeFile(){
     fclose(fptr);
     updated = true;
     strcpy(errorMsg, "Data has successfully been written.");
-}
-
-void getBackup(){
-    FILE *fptr1, *fptr2;
-    fptr1 = fopen("gudang.txt", "w");
-    fptr2 = fopen("backup.txt", "r");
-    char c;
-    while (fscanf(fptr2, "%c", &c) != EOF){ 
-        fprintf(fptr1, "%c", c);
-    }
-    fclose(fptr1);
-    fclose(fptr2);
+    writeBackup();
 }
 
 int main()
