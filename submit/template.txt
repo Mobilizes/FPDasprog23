@@ -1,3 +1,5 @@
+Use as a template for gudang.txt and backup.txt.
+
 0 Beras
 1 Kedelai
 2 Gula
@@ -14,6 +16,5 @@
 2:
 0 Rafinasi 17
 1 Pasir 25
-2 Batu 23
 -1
 -1

@@ -309,7 +309,7 @@ void modifyData(int *group, int *data){
         printf("Prompt new ID.\n");
     }
 
-    if(ID==-1) ID = *data;
+    if(ID==-1 || ID==*data) ID = *data;
     else{
         strcpy(Gudang[*group].itm[ID].nama, Gudang[*group].itm[*data].nama);
         Gudang[*group].itm[ID].stok = Gudang[*group].itm[*data].stok;
@@ -340,19 +340,14 @@ void modifyDataGroup(int *pointer, int *group){
     printDataGroup(pointer, group);
     printf("Prompt new ID. (-1 to leave unchanged.)\n");
     int ID; 
-    while(!inputNum(&ID)){
+    while((!inputNum(&ID) || Gudang[ID].nama[0]!='\0') && ID != -1 && ID != *group){
+        if(Gudang[ID].nama[0]!='\0') strcpy(errorMsg, "That ID already exists!");
         printError;
-        printf("Prompt data group ID.\n");
+        printf("Prompt new ID.\n");
+        fflush(stdin);
     }
-    if(ID!=-1 && ID != *group){
-        if(Gudang[*group].itm[ID].nama[0]=='\0'){
-            strcpy(errorMsg, "That ID doesn\'t exist!");
-            return;
-        }
-        if(Gudang[ID].nama[0]!='\0'){
-            strcpy(errorMsg, "That ID already exists!");
-            return;
-        }
+    if(ID==-1 || ID == *group) ID = *group;
+    else{
         strcpy(Gudang[ID].nama, Gudang[*group].nama);
         for(int i=0; i<=1000; i++){
             if(Gudang[*group].itm[i].nama[0]=='\0') continue;
@@ -360,7 +355,7 @@ void modifyDataGroup(int *pointer, int *group){
             Gudang[ID].itm[i].stok = Gudang[*group].itm[i].stok;
         }
         deleteDataGroup(group);
-    } else ID = *group;
+    }
 
     printf("Prompt new name. (-1 to leave unchanged.)\n");
     char name[1001]; scanf("%s", name);
