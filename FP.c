@@ -59,8 +59,8 @@ void updatelenGudang(){
 }
 
 int checkDigit(int n){
-    int res = 0;
-    while(n > 0){
+    int res = 1;
+    while(n >= 10){
         n /= 10;
         res++;
     }
@@ -205,6 +205,10 @@ bool inputNum(int *num){
         strcpy(errorMsg, "Too big of an input! Please keep it within 0 to 1000 inclusive.");
         return false;
     }
+    if(*num<0){
+        strcpy(errorMsg, "Too small of an input! Please keep it within 0 to 1000 inclusive.");
+        return false;
+    }
     return true;
 }
 
@@ -319,11 +323,14 @@ void modifyData(int *group, int *data){
 
     printf("Prompt updated stock. (-1 to leave unchanged.)\n");
     int stock; 
-    while(!inputNum(&stock)){
+    while(scanf("%d", &stock)!=1){
+        strcpy(errorMsg, "Invalid input!");
+        fflush(stdin);
         printError;
-        printf("Prompt updated stock.\n");
+        printf("Prompt data stock.\n");
     }
     if(stock!=-1) Gudang[*group].itm[ID].stok = stock;
+    Gudang[*group].itm[ID].stok = max(Gudang[*group].itm[ID].stok, 0);
 
     strcpy(errorMsg, "The selected data has successfully been modified.");
     updated = false;
