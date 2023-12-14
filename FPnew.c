@@ -316,46 +316,62 @@ void readFile(){
         }
     }
     FILE *fptr;
-    fptr = fopen("gudang.txt", "r+");
-    if(fptr==NULL){
-
-    }
+    fptr = fopen("gudang.txt", "r");
     int idx = 0;
-    fscanf(fptr, "%d ", &idx);
-    if(idx==-1){
-        wrongFormat();
-        return;
-    } else fscanf(fptr, "%s", &Gudang[idx].nama);
-
+    printf("success1\n");
     while(1){
-        if(fscanf(fptr, "%d ", &idx)==EOF){
+        int output = fscanf(fptr, "%d", &idx);
+        printf("%d\n", idx);
+        if(output!=1 || output==EOF){
+            printf("no1\n");
+            wrongFormat();
+            return;
+        }
+        if(idx>1000){
+            printf("no2\n");
             wrongFormat();
             return;
         }
         if(idx==-1) break;
+        if(Gudang[idx].nama[0]!='\0'){
+            printf("no3\n");
+            wrongFormat();
+            return;
+        }
         fscanf(fptr, "%s", &Gudang[idx].nama);
+        
     }
-
     while(1){
-        if(fscanf(fptr, "%d ", &idx)==EOF){
-            fprintf(fptr, "-1");
+        int output = fscanf(fptr, "%d:", &idx);
+        if(output!=1 || output==EOF){
+            wrongFormat();
+            return;
+        }
+        if(idx>1000){
             wrongFormat();
             return;
         }
         if(idx==-1) break;
         if(Gudang[idx].nama[0]=='\0'){
-            fprintf(fptr, "-1");
             wrongFormat();
             return;
         }
         while(1){
             int i;
-            if(fscanf(fptr, "%d ", &i)==EOF){
-                fprintf(fptr, "-1");
+            int output = fscanf(fptr, "%d", &i);
+            if(output!=1 || output==EOF){
+                wrongFormat();
+                return;
+            }
+            if(i>1000){
                 wrongFormat();
                 return;
             }
             if(i==-1) break;
+            if(Gudang[idx].itm[i].nama[0]!='\0'){
+                wrongFormat();
+                return;
+            }
             fscanf(fptr, "%s %d", Gudang[idx].itm[i].nama, &Gudang[idx].itm[i].stok);
         }
     }
