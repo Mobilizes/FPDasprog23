@@ -411,7 +411,6 @@ void readFile(){
     int idx = 0;
     while(1){
         int output = fscanf(fptr, "%d", &idx);
-        printf("%d\n", idx);
         if(output!=1 || output==EOF){
             wrongFormat();
             return;
@@ -504,14 +503,14 @@ int main()
     bool groupToggle = false;
     readFile();
     if(strcmp(errorMsg, "gudang.txt is not on correct format!")==0){
-        // clear;
+        clear;
         printError;
         printf("Do you wish to use a backup? ("green"Y"white"/"red"N"white")\n");
         int query = getch();
         if(query=='Y' || query=='y') getBackup();
         else return 0;
         readFile();
-        strcpy(errorMsg, "gudang.txt\'s data is lost.");
+        strcpy(errorMsg, "Data successfully restored.");
     }
     updateTotalData();
     while(1){
