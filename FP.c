@@ -291,6 +291,7 @@ void deleteDataGroup(int *group){
     strcpy(Gudang[*group].nama, "\0");
     for(int data=0; data<=1000; data++) deleteData(group, &data);
     updatelenGudang();
+    updateTotalData();
     strcpy(errorMsg, "The selected data group has successfully been deleted.");
 }
 
@@ -523,6 +524,7 @@ int main()
         printf("T. Toggle to %s\n", groupToggle ? "singular." : "group.");
         printf("R. Reset changes.\n");
         printf("C. Commit changes to file.\n");
+        printf("B. Get backup. "red"(ONLY USE WHEN NECESSARY!)\n"white);
         printf("Esc. Exit the program.\n\n");
         printError;
         strcpy(errorMsg, "");
@@ -560,11 +562,23 @@ int main()
                     strcpy(errorMsg, "gudang.txt is tampered manually and not on correct format! backup.txt has been used to fix the issue.\n");
                 }
             }
+            else if(query=='B' || query=='b'){
+                printf(red"Are you sure? "white"("green"Y"white"/"red"N"white")\n");
+                int confirm = getch();
+                if(confirm=='Y' || confirm=='y'){
+                    getBackup();
+                    readFile();
+                    strcpy(errorMsg, "Restoration executed.");
+                } else strcpy(errorMsg, "Restoration aborted.");
+            }
             else if(query==27) break;
             else strcpy(errorMsg, "Invalid input!");
         }
         pointer = max(0, pointer);
         pointer = min(pointer, (groupToggle ? totalDataGroup-1 : totalData-1));
+        updatelenGudang();
+        updatelenItemStok();
+        updateTotalData();
     }
     printf(red"Program has successfully been exited.\n");
     return 0;
