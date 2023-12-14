@@ -15,6 +15,7 @@
 #define cyan "\033[0;36m"
 #define white "\033[0;37m"
 #define clear system("cls")
+#define printError printf(red"%s\n"white, errorMsg);
 
 typedef long long ll;
 typedef struct{
@@ -50,6 +51,7 @@ void updateTotalData(){
 }
 
 void updatelenGudang(){
+    maxlenGudang = 0;
     for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
         maxlenGudang = max(maxlenGudang, strlen(Gudang[i].nama));
@@ -57,8 +59,8 @@ void updatelenGudang(){
 }
 
 int checkDigit(int n){
-    int res = 0;
-    while(n > 0){
+    int res = 1;
+    while(n >= 10){
         n /= 10;
         res++;
     }
@@ -66,6 +68,8 @@ int checkDigit(int n){
 }
 
 void updatelenItemStok(){
+    maxlenItem = 0;
+    maxlenStok = 0;
     for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
         for(int j=0; j<=1000; j++){
@@ -201,37 +205,85 @@ bool inputNum(int *num){
         strcpy(errorMsg, "Too big of an input! Please keep it within 0 to 1000 inclusive.");
         return false;
     }
+    if(*num<0){
+        strcpy(errorMsg, "Too small of an input! Please keep it within 0 to 1000 inclusive.");
+        return false;
+    }
     return true;
 }
 
-void addData(){
+void addData(int *group){
     int trash = -1;
-    printOut(&trash, &trash, &trash);
-    printf("Prompt data group ID.\n");
-    int group; if(!inputNum(&group)) return;
-    if(Gudang[group].nama[0]=='\0'){
-        strcpy(errorMsg, "That ID doesn\'t exist!");
-        return;
+    bool flag = false;
+    if(*group==-1){
+        flag = true;
+        printDataGroup(&trash, group);
+        printf("Prompt data group ID.\n");
+        while(!inputNum(group) || Gudang[*group].nama[0]=='\0'){
+            if(Gudang[*group].nama[0]=='\0') strcpy(errorMsg, "That ID doesn\'t exist!");
+            printError;
+            printf("Prompt data group ID.\n");
+        }
     }
+
+    int idx;
+    if(flag) printSpecificGroup(group, &trash);
     printf("Prompt data ID.\n");
-    int idx; if(!inputNum(&idx)) return;
-    if(Gudang[group].itm[idx].nama[0]!='\0'){
-        strcpy(errorMsg, "That ID already exists!");
-        return;
+    while(!inputNum(&idx) || Gudang[*group].itm[idx].nama[0]!='\0'){
+        if(Gudang[*group].itm[idx].nama[0]!='\0') strcpy(errorMsg, "That ID already exists!");
+        printError;
+        printf("Prompt data ID.\n");
     }
+    
     printf("Prompt data name.\n");
-    scanf("%s", Gudang[group].itm[idx].nama);
+    scanf("%s", Gudang[*group].itm[idx].nama);
     fflush(stdin);
+
     printf("Prompt data stock.\n");
-    if(!inputNum(&Gudang[group].itm[idx].stok)) return;
+    while(scanf("%d", &Gudang[*group].itm[idx].stok)!=1){
+        strcpy(errorMsg, "Invalid input!");
+        fflush(stdin);
+        printError;
+        printf("Prompt data stock.\n");
+    }
+    fflush(stdin);
+
+    Gudang[*group].itm[idx].stok = max(Gudang[*group].itm[idx].stok, 0);
+    printOut(&trash, &trash, &trash);
+
     updatelenItemStok();
     updateTotalData();
     updated = false;
     strcpy(errorMsg, "The new data has successfully been added.");
 }
 
+void addDataGroup(){
+    int trash = -1;
+    printDataGroup(&trash, &trash);
+    printf("Prompt data group ID.\n");
+    int group; 
+    while(!inputNum(&group) || Gudang[group].nama[0]!='\0'){
+        if(Gudang[group].nama[0]!='\0') strcpy(errorMsg, "That ID already exists!");
+        printError;
+        printf("Prompt data group ID.\n");
+    }
+    updateTotalData();
+
+    printf("Prompt data group name.\n");
+    scanf("%s", Gudang[group].nama);
+    fflush(stdin);
+
+    updatelenGudang();
+
+    printf("Please add data to newly added data group.\n");
+    addData(&group);
+    
+    updated = false;
+    strcpy(errorMsg, "The new data group has successfully been added.");
+}
+
 void deleteData(int *group, int *data){
-    strcpy(Gudang[*group].itm[*data].nama, "");
+    strcpy(Gudang[*group].itm[*data].nama, "\0");
     Gudang[*group].itm[*data].stok = 0;
     updatelenItemStok();
     updateTotalData();
@@ -240,26 +292,29 @@ void deleteData(int *group, int *data){
 }
 
 void deleteDataGroup(int *group){
-    strcpy(Gudang[*group].nama, "");
+    strcpy(Gudang[*group].nama, "\0");
     for(int data=0; data<=1000; data++) deleteData(group, &data);
     updatelenGudang();
+    updateTotalData();
     strcpy(errorMsg, "The selected data group has successfully been deleted.");
 }
 
-void modifyData(int *pointer, int *group, int *data){
+void modifyData(int *group, int *data){
     printSpecificGroup(group, data);
-
     printf("Prompt new ID. (-1 to leave unchanged.)\n");
-    int ID; if(!inputNum(&ID)) return;
-    if(ID!=-1){
-        if(Gudang[*group].itm[ID].nama[0]!='\0'){
-            strcpy(errorMsg, "That ID already exists!");
-            return;
-        }
+    int ID; 
+    while((!inputNum(&ID) || Gudang[*group].itm[ID].nama[0]!='\0') && ID != -1){
+        if(Gudang[*group].itm[ID].nama[0]!='\0') strcpy(errorMsg, "That ID already exists!");
+        printError;
+        printf("Prompt new ID.\n");
+    }
+
+    if(ID==-1) ID = *data;
+    else{
         strcpy(Gudang[*group].itm[ID].nama, Gudang[*group].itm[*data].nama);
         Gudang[*group].itm[ID].stok = Gudang[*group].itm[*data].stok;
         deleteData(group, data);
-    } else ID = *data;
+    }
 
     printf("Prompt new name. (-1 to leave unchanged.)\n");
     char name[1001]; scanf("%s", name);
@@ -267,8 +322,15 @@ void modifyData(int *pointer, int *group, int *data){
     if(strcmp(name, "-1")!=0) strcpy(Gudang[*group].itm[ID].nama, name);
 
     printf("Prompt updated stock. (-1 to leave unchanged.)\n");
-    int stock; if(!inputNum(&stock)) return;
+    int stock; 
+    while(scanf("%d", &stock)!=1){
+        strcpy(errorMsg, "Invalid input!");
+        fflush(stdin);
+        printError;
+        printf("Prompt data stock.\n");
+    }
     if(stock!=-1) Gudang[*group].itm[ID].stok = stock;
+    Gudang[*group].itm[ID].stok = max(Gudang[*group].itm[ID].stok, 0);
 
     strcpy(errorMsg, "The selected data has successfully been modified.");
     updated = false;
@@ -276,10 +338,17 @@ void modifyData(int *pointer, int *group, int *data){
 
 void modifyDataGroup(int *pointer, int *group){
     printDataGroup(pointer, group);
-
     printf("Prompt new ID. (-1 to leave unchanged.)\n");
-    int ID; if(!inputNum(&ID)) return;
-    if(ID!=-1){
+    int ID; 
+    while(!inputNum(&ID)){
+        printError;
+        printf("Prompt data group ID.\n");
+    }
+    if(ID!=-1 && ID != *group){
+        if(Gudang[*group].itm[ID].nama[0]=='\0'){
+            strcpy(errorMsg, "That ID doesn\'t exist!");
+            return;
+        }
         if(Gudang[ID].nama[0]!='\0'){
             strcpy(errorMsg, "That ID already exists!");
             return;
@@ -306,6 +375,30 @@ void wrongFormat(){
     strcpy(errorMsg, "gudang.txt is not on correct format!");
 }
 
+void writeBackup(){
+    FILE *fptr1, *fptr2;
+    fptr1 = fopen("gudang.txt", "r");
+    fptr2 = fopen("backup.txt", "w");
+    char c;
+    while (fscanf(fptr1, "%c", &c) != EOF){ 
+        fprintf(fptr2, "%c", c);
+    }
+    fclose(fptr1);
+    fclose(fptr2);
+}
+
+void getBackup(){
+    FILE *fptr1, *fptr2;
+    fptr1 = fopen("gudang.txt", "w");
+    fptr2 = fopen("backup.txt", "r");
+    char c;
+    while (fscanf(fptr2, "%c", &c) != EOF){ 
+        fprintf(fptr1, "%c", c);
+    }
+    fclose(fptr1);
+    fclose(fptr2);
+}
+
 void readFile(){
     int i=0, j=0;
     for(i=0; i<=1000; i++){
@@ -318,23 +411,18 @@ void readFile(){
     FILE *fptr;
     fptr = fopen("gudang.txt", "r");
     int idx = 0;
-    printf("success1\n");
     while(1){
         int output = fscanf(fptr, "%d", &idx);
-        printf("%d\n", idx);
         if(output!=1 || output==EOF){
-            printf("no1\n");
             wrongFormat();
             return;
         }
         if(idx>1000){
-            printf("no2\n");
             wrongFormat();
             return;
         }
         if(idx==-1) break;
         if(Gudang[idx].nama[0]!='\0'){
-            printf("no3\n");
             wrongFormat();
             return;
         }
@@ -406,18 +494,7 @@ void writeFile(){
     fclose(fptr);
     updated = true;
     strcpy(errorMsg, "Data has successfully been written.");
-}
-
-void getBackup(){
-    FILE *fptr1, *fptr2;
-    fptr1 = fopen("gudang.txt", "w");
-    fptr2 = fopen("backup.txt", "r");
-    char c;
-    while (fscanf(fptr2, "%c", &c) != EOF){ 
-        fprintf(fptr1, "%c", c);
-    }
-    fclose(fptr1);
-    fclose(fptr2);
+    writeBackup();
 }
 
 int main()
@@ -428,14 +505,14 @@ int main()
     bool groupToggle = false;
     readFile();
     if(strcmp(errorMsg, "gudang.txt is not on correct format!")==0){
-        // clear;
-        printf(red"%s\n"white, errorMsg);
+        clear;
+        printError;
         printf("Do you wish to use a backup? ("green"Y"white"/"red"N"white")\n");
         int query = getch();
         if(query=='Y' || query=='y') getBackup();
         else return 0;
         readFile();
-        strcpy(errorMsg, "gudang.txt\'s data is lost.");
+        strcpy(errorMsg, "Data successfully restored.");
     }
     updateTotalData();
     while(1){
@@ -448,36 +525,61 @@ int main()
         printf("T. Toggle to %s\n", groupToggle ? "singular." : "group.");
         printf("R. Reset changes.\n");
         printf("C. Commit changes to file.\n");
+        printf("B. Get backup. "red"(ONLY USE WHEN NECESSARY!)\n"white);
         printf("Esc. Exit the program.\n\n");
-        printf(red"%s\n"white, errorMsg);
+        printError;
         strcpy(errorMsg, "");
+
         int query = getch();
         if(query==0 || query==224){
             int dir = getch();
             if(dir==72) pointer--;
             else if(dir==80) pointer++;
             else strcpy(errorMsg, "Invalid input!");
-            pointer = max(0, pointer);
-            pointer = min(pointer, (groupToggle ? totalDataGroup-1 : totalData-1));
         } else{
             if(query=='1'){
                 if(groupToggle) modifyDataGroup(&pointer, &selectedGroup);
-                else modifyData(&pointer, &selectedGroup, &selectedID);
+                else modifyData(&selectedGroup, &selectedID);
             }
             else if(query=='2'){
                 if(groupToggle) deleteDataGroup(&selectedGroup);
                 else deleteData(&selectedGroup, &selectedID);
             }
-            else if(query=='3') addData();
+            else if(query=='3'){
+                int trash = -1;
+                if(groupToggle) addDataGroup();
+                else addData(&trash);
+            }
             else if(query=='T' || query=='t'){
                 groupToggle = !groupToggle;
                 pointer = 0;
             }
             else if(query=='C' || query=='c') writeFile();
-            else if(query=='R' || query=='r') readFile();
+            else if(query=='R' || query=='r'){
+                readFile();
+                if(strcmp(errorMsg, "gudang.txt is not on correct format!")==0){\
+                    getBackup();
+                    readFile();
+                    strcpy(errorMsg, "gudang.txt is tampered manually and not on correct format! backup.txt has been used to fix the issue.\n");
+                }
+            }
+            else if(query=='B' || query=='b'){
+                printf(red"Are you sure? "white"("green"Y"white"/"red"N"white")\n");
+                int confirm = getch();
+                if(confirm=='Y' || confirm=='y'){
+                    getBackup();
+                    readFile();
+                    strcpy(errorMsg, "Restoration executed.");
+                } else strcpy(errorMsg, "Restoration aborted.");
+            }
             else if(query==27) break;
             else strcpy(errorMsg, "Invalid input!");
         }
+        pointer = max(0, pointer);
+        pointer = min(pointer, (groupToggle ? totalDataGroup-1 : totalData-1));
+        updatelenGudang();
+        updatelenItemStok();
+        updateTotalData();
     }
     printf(red"Program has successfully been exited.\n");
     return 0;
