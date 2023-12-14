@@ -51,6 +51,7 @@ void updateTotalData(){
 }
 
 void updatelenGudang(){
+    maxlenGudang = 0;
     for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
         maxlenGudang = max(maxlenGudang, strlen(Gudang[i].nama));
@@ -67,6 +68,8 @@ int checkDigit(int n){
 }
 
 void updatelenItemStok(){
+    maxlenItem = 0;
+    maxlenStok = 0;
     for(int i=0; i<=1000; i++){
         if(Gudang[i].nama[0]=='\0') continue;
         for(int j=0; j<=1000; j++){
@@ -207,7 +210,9 @@ bool inputNum(int *num){
 
 void addData(int *group){
     int trash = -1;
+    bool flag = false;
     if(*group==-1){
+        flag = true;
         printDataGroup(&trash, group);
         printf("Prompt data group ID.\n");
         while(!inputNum(group) || Gudang[*group].nama[0]=='\0'){
@@ -218,7 +223,7 @@ void addData(int *group){
     }
 
     int idx;
-    printSpecificGroup(group, &trash);
+    if(flag) printSpecificGroup(group, &trash);
     printf("Prompt data ID.\n");
     while(!inputNum(&idx) || Gudang[*group].itm[idx].nama[0]!='\0'){
         if(Gudang[*group].itm[idx].nama[0]!='\0') strcpy(errorMsg, "That ID already exists!");
@@ -266,6 +271,7 @@ void addDataGroup(){
 
     updatelenGudang();
 
+    printf("Please add data to newly added data group.\n");
     addData(&group);
     
     updated = false;
@@ -335,7 +341,7 @@ void modifyDataGroup(int *pointer, int *group){
         printError;
         printf("Prompt data group ID.\n");
     }
-    if(ID!=-1){
+    if(ID!=-1 && ID != *group){
         if(Gudang[*group].itm[ID].nama[0]=='\0'){
             strcpy(errorMsg, "That ID doesn\'t exist!");
             return;
@@ -402,23 +408,19 @@ void readFile(){
     FILE *fptr;
     fptr = fopen("gudang.txt", "r");
     int idx = 0;
-    printf("success1\n");
     while(1){
         int output = fscanf(fptr, "%d", &idx);
         printf("%d\n", idx);
         if(output!=1 || output==EOF){
-            printf("no1\n");
             wrongFormat();
             return;
         }
         if(idx>1000){
-            printf("no2\n");
             wrongFormat();
             return;
         }
         if(idx==-1) break;
         if(Gudang[idx].nama[0]!='\0'){
-            printf("no3\n");
             wrongFormat();
             return;
         }
